@@ -4,7 +4,7 @@ import { IoPersonSharp } from "react-icons/io5";
 import { MdEmail } from "react-icons/md";
 import { BsFillTelephoneFill } from "react-icons/bs";
 import { FcLock, FcUnlock } from "react-icons/fc";
-import { FaLocationDot, FaTransgender } from "react-icons/fa6";
+//import { FaLocationDot, FaTransgender } from "react-icons/fa6";
 
 const Register = () => {
     const [showPassword, setShowPassword] = useState(true);
