@@ -3,7 +3,11 @@ import { Link } from "react-router-dom";
 import Navbar from "../Components/Navbar";
 import Footer from "../Components/Footer";
 import ProductCard from "../Components/ProductCard";
-import { Fashion, Accessories, Furniture, Appliances, Toys, images } from "../StaticData/staticData";
+import { images } from "../StaticData/staticData"; // Assuming you have images imported
+
+// Import Firebase Firestore functionalities
+import { db } from "../firebase"; // Adjust the path as per your setup
+import { collection, getDocs } from "firebase/firestore";
 
 const Home = ({ darkTheme, toggleTheme }) => {
     const [currentIndex, setCurrentIndex] = useState(0);
@@ -18,6 +22,7 @@ const Home = ({ darkTheme, toggleTheme }) => {
         womensFashion: false,
         kidsFashion: false
     });
+    const [topPicks, setTopPicks] = useState([]);
     const topPicksRef = useRef(null);
 
     const handleShopNowClick = () => {
@@ -36,6 +41,24 @@ const Home = ({ darkTheme, toggleTheme }) => {
             };
         });
     };
+
+    // Fetch top picks from Firestore on component mount
+    useEffect(() => {
+        const fetchTopPicks = async () => {
+            try {
+                const querySnapshot = await getDocs(collection(db, "products")); // Adjust "products" to your collection name
+                const products = querySnapshot.docs.map(doc => ({
+                    id: doc.id,
+                    ...doc.data()
+                }));
+                setTopPicks(products);
+            } catch (error) {
+                console.error("Error fetching products:", error);
+            }
+        };
+
+        fetchTopPicks();
+    }, []);
 
     useEffect(() => {
         const interval = setInterval(() => {
@@ -56,97 +79,36 @@ const Home = ({ darkTheme, toggleTheme }) => {
                             Mobiles
                         </li>
                     </Link>
-                    <li className={`relative text-sm md:text-lg lg:text-2xl font-comfortaa font-medium mx-2 lg:mx-0 ${darkTheme ? 'text-white' : 'text-black'} cursor-pointer`} onMouseEnter={() => toggleDropdown('fashion')} onMouseLeave={() => toggleDropdown('fashion')} >
-                        <img src="/Assets/fashion.png" alt="logo" className="w-8 md:w-12 lg:w-16" />
-                        Fashion
-                        {dropdownOpen.fashion && (
-                            <ul className="absolute top-20 mt-2 w-44 bg-white shadow-lg rounded-md p-2 z-20">
-                                {Fashion.map((item) => (
-                                    <div className="flex flex-row items-center justify-between hover:bg-gray-300 hover:text-[#304463]" key={item.id}>
-                                        <Link to={`/fashion/${item.desc}`} className="text-gray-600 hover:text-[#304463]">
-                                            <li className="p-2 text-gray-600 hover:text-[#304463]" style={{ lineHeight: '1.12rem' }}>{item.desc}</li>
-                                        </Link>
-                                    </div>
-                                ))}
-                            </ul>
-                        )}
-                    </li>
-                    <li className={`relative text-sm md:text-lg lg:text-2xl font-comfortaa font-medium mx-2 lg:mx-0 ${darkTheme ? 'text-white' : 'text-black'} cursor-pointer`} onMouseEnter={() => toggleDropdown('accessories')} onMouseLeave={() => toggleDropdown('accessories')}>
-                        <img src="/Assets/assessories.png" alt="logo" className="w-8 md:w-12 lg:w-16 ml-[0.7rem]" />
-                        Accessories
-                        {dropdownOpen.accessories && (
-                            <ul className="absolute top-20 mt-2 w-52 bg-white shadow-lg rounded-md p-2 z-20">
-                                {
-                                    Accessories.map((item) => (
-                                        <div className="flex flex-row items-center justify-between hover:bg-gray-300 hover:text-[#304463]" key={item.id}>
-                                            <Link to={`/assessories/${item.desc}`} className="text-gray-600 hover:text-[#304463]">
-                                                <li className="p-2 text-gray-600 hover:text-[#304463]" style={{ lineHeight: '1.12rem' }}>{item.desc}</li>
-                                            </Link>
-                                        </div>
-                                    ))
-                                }
-                            </ul>
-                        )}
-                    </li>
-                    <li className={`relative text-sm md:text-lg lg:text-2xl font-comfortaa font-medium mx-2 lg:mx-0 ${darkTheme ? 'text-white' : 'text-black'} cursor-pointer`} onMouseEnter={() => toggleDropdown('furniture')} onMouseLeave={() => toggleDropdown('furniture')}>
-                        <img src="/Assets/furniture.png" alt="logo" className="w-8 md:w-12 lg:w-16 ml-[0.4rem]" />
-                        Furniture
-                        {dropdownOpen.furniture && (
-                            <ul className="absolute top-20 mt-2 w-52 bg-white shadow-lg rounded-md p-2 z-20">
-                                {
-                                    Furniture.map((item) => (
-                                        <div className="flex flex-row items-center justify-between hover:bg-gray-300 hover:text-[#304463]" key={item.id}>
-                                            <Link to={`/furniture/${item.desc}`} className="text-gray-600 hover:text-[#304463]">
-                                                <li className="p-2 text-gray-600 hover:text-[#304463]" style={{ lineHeight: '1.12rem' }}>{item.desc}</li>
-                                            </Link>
-                                        </div>
-                                    ))
-                                }
-                            </ul>
-                        )}
-                    </li>
-                    <li className={`relative text-sm md:text-lg lg:text-2xl font-comfortaa font-medium mx-2 lg:mx-0 ${darkTheme ? 'text-white' : 'text-black'} cursor-pointer`} onMouseEnter={() => toggleDropdown('appliances')} onMouseLeave={() => toggleDropdown('appliances')}>
-                        <img src="/Assets/appliances.png" alt="logo" className="w-8 md:w-12 lg:w-16 ml-4" />
-                        Appliances
-                        {
-                            dropdownOpen.appliances && (
-                                <ul className="absolute top-20 mt-2 w-56 bg-white shadow-lg rounded-md p-2 z-20">
-                                    {
-                                        Appliances.map((item) => (
-                                            <div className="flex flex-row items-center justify-between hover:bg-gray-300 hover:text-[#304463]" key={item.id}>
-                                                <Link to={`/appliance/${item.desc}`} className="text-gray-600 hover:text-[#304463]">
-                                                    <li className="p-2 text-gray-600 hover:text-[#304463]" style={{ lineHeight: '1.12rem' }}>{item.desc}</li>
-                                                </Link>
-                                            </div>
-                                        ))
-                                    }
-                                </ul>
-                            )
-                        }
-                    </li>
-                    <Link to="/grocery" className="text-sm md:text-lg lg:text-2xl font-comfortaa font-medium mx-2 lg:mx-0">
-                        <li className={`relative text-sm md:text-lg lg:text-2xl font-comfortaa font-medium mx-2 lg:mx-0 ${darkTheme ? 'text-white' : 'text-black'} cursor-pointer`} onMouseEnter={() => toggleDropdown('grocery')} onMouseLeave={() => toggleDropdown('grocery')}>
-                            <img src="/Assets/grocery.png" alt="logo" className="w-8 md:w-12 lg:w-16" />
-                            Grocery
+                    <Link to="/fashion" className="text-sm md:text-lg lg:text-2xl font-comfortaa font-medium mx-2 lg:mx-0">
+                        <li className={`relative text-sm md:text-lg lg:text-2xl font-comfortaa font-medium mx-2 lg:mx-0 ${darkTheme ? 'text-white' : 'text-black'} cursor-pointer`} onMouseEnter={() => toggleDropdown('fashion')} onMouseLeave={() => toggleDropdown('fashion')}>
+                            <img src="/Assets/fashion.png" alt="logo" className="w-8 md:w-12 lg:w-16" />
+                            Fashion
                         </li>
                     </Link>
-                    <li className={`relative text-sm md:text-lg lg:text-2xl font-comfortaa font-medium mx-2 lg:mx-0 ${darkTheme ? 'text-white' : 'text-black'} cursor-pointer`} onMouseEnter={() => toggleDropdown('toys')} onMouseLeave={() => toggleDropdown('toys')}>
-                        <img src="/Assets/books.png" alt="logo" className="w-8 md:w-12 lg:w-16 ml-10" />
-                        Books, Sports & Toys
-                        {dropdownOpen.toys && (
-                            <ul className="absolute top-20 mt-2 w-48 bg-white shadow-lg rounded-md p-2 z-20">
-                                {
-                                    Toys.map((item) => (
-                                        <div className="flex flex-row items-center justify-between hover:bg-gray-300 hover:text-[#304463]" key={item.id}>
-                                            <Link to={`/sports/${item.desc}`} className="text-gray-600 hover:text-[#304463]">
-                                                <li className="p-2 text-gray-600 hover:text-[#304463]" style={{ lineHeight: '1.12rem' }}>{item.desc}</li>
-                                            </Link>
-                                        </div>
-                                    ))
-                                }
-                            </ul>
-                        )}
-                    </li>
+                    <Link to="/assessories" className="text-sm md:text-lg lg:text-2xl font-comfortaa font-medium mx-2 lg:mx-0">
+                        <li className={`relative text-sm md:text-lg lg:text-2xl font-comfortaa font-medium mx-2 lg:mx-0 ${darkTheme ? 'text-white' : 'text-black'} cursor-pointer`} onMouseEnter={() => toggleDropdown('accessories')} onMouseLeave={() => toggleDropdown('accessories')}>
+                            <img src="/Assets/assessories.png" alt="logo" className="w-8 md:w-12 lg:w-16 ml-[0.7rem]" />
+                            Accessories
+                        </li>
+                    </Link>
+                    <Link to="/furniture" className="text-sm md:text-lg lg:text-2xl font-comfortaa font-medium mx-2 lg:mx-0">
+                        <li className={`relative text-sm md:text-lg lg:text-2xl font-comfortaa font-medium mx-2 lg:mx-0 ${darkTheme ? 'text-white' : 'text-black'} cursor-pointer`} onMouseEnter={() => toggleDropdown('furniture')} onMouseLeave={() => toggleDropdown('furniture')}>
+                            <img src="/Assets/furniture.png" alt="logo" className="w-8 md:w-12 lg:w-16 ml-[0.4rem]" />
+                            Furniture
+                        </li>
+                    </Link>
+                    <Link to="/appliance" className="text-sm md:text-lg lg:text-2xl font-comfortaa font-medium mx-2 lg:mx-0">
+                        <li className={`relative text-sm md:text-lg lg:text-2xl font-comfortaa font-medium mx-2 lg:mx-0 ${darkTheme ? 'text-white' : 'text-black'} cursor-pointer`} onMouseEnter={() => toggleDropdown('appliances')} onMouseLeave={() => toggleDropdown('appliances')}>
+                            <img src="/Assets/appliances.png" alt="logo" className="w-8 md:w-12 lg:w-16 ml-4" />
+                            Appliances
+                        </li>
+                    </Link>
+                    <Link to="/sports" className="text-sm md:text-lg lg:text-2xl font-comfortaa font-medium mx-2 lg:mx-0">
+                        <li className={`relative text-sm md:text-lg lg:text-2xl font-comfortaa font-medium mx-2 lg:mx-0 ${darkTheme ? 'text-white' : 'text-black'} cursor-pointer`} onMouseEnter={() => toggleDropdown('toys')} onMouseLeave={() => toggleDropdown('toys')}>
+                            <img src="/Assets/books.png" alt="logo" className="w-8 md:w-12 lg:w-16 ml-10" />
+                            Books, Sports & Toys
+                        </li>
+                    </Link>
                 </ul>
             </div>
             <div className={`${darkTheme ? 'bg-[#1f1e20] text-white' : 'bg-white text-black'} flex flex-col lg:flex-row w-full p-4 lg:p-6`}>
@@ -186,11 +148,9 @@ const Home = ({ darkTheme, toggleTheme }) => {
                     <hr className="border-2 border-[#667BC6] w-60 ml-10" />
                 </div>
                 <div className="flex flex-wrap justify-center gap-[2rem] mx-6">
-                    {Array(10)
-                        .fill(0)
-                        .map((_, i) => (
-                            <ProductCard key={i} darkTheme={darkTheme} />
-                        ))}
+                    {topPicks.map((product) => (
+                        <ProductCard key={product.id} product={product} darkTheme={darkTheme} />
+                    )).slice(0, 12)}
                 </div>
             </div>
             <div className={`flex flex-col items-center justify-center p-4 lg:p-2 ${darkTheme ? 'bg-[#31363F]' : 'bg-[#F5F7F8]'}`}>
@@ -218,4 +178,3 @@ const Home = ({ darkTheme, toggleTheme }) => {
 }
 
 export default Home;
-

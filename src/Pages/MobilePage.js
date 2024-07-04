@@ -1,11 +1,14 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Navbar from "../Components/Navbar";
 import Footer from "../Components/Footer";
 import ProductCard from "../Components/ProductCard";
+import { db } from "../firebase";
+import { collection, getDocs, query, where } from "firebase/firestore";
 
-const MobilePage = ({darkTheme,toggleTheme}) => {
+const MobilePage = ({ darkTheme, toggleTheme }) => {
     const [minPrice, setMinPrice] = useState(300);
     const [maxPrice, setMaxPrice] = useState(15000);
+    const [products, setProducts] = useState([]);
 
     const handleMinChange = (e) => {
         setMinPrice(Number(e.target.value));
@@ -14,6 +17,21 @@ const MobilePage = ({darkTheme,toggleTheme}) => {
     const handleMaxChange = (e) => {
         setMaxPrice(Number(e.target.value));
     };
+
+    useEffect(() => {
+        const fetchProducts = async () => {
+            const q = query(collection(db, "products"), where("category", "==", "Mobile"));
+            const querySnapshot = await getDocs(q);
+            const productsList = querySnapshot.docs.map(doc => ({
+                id: doc.id,
+                ...doc.data()
+            }));
+            setProducts(productsList);
+        };
+
+        fetchProducts();
+    }, []);
+
 
     return (
         <>
@@ -104,11 +122,9 @@ const MobilePage = ({darkTheme,toggleTheme}) => {
                 </div>
                 <div className={`flex flex-col p-4 lg:p-6 ${darkTheme ? 'bg-gray-900' : 'bg-white'}`}>
                     <div className="flex flex-wrap gap-4">
-                        {Array(10)
-                            .fill(0)
-                            .map((_, i) => (
-                                <ProductCard key={i} darkTheme={darkTheme} />
-                            ))}
+                    {products.map((product) => (
+                            <ProductCard key={product.id} product={product} />
+                        ))}
                     </div>
                 </div>
             </div>

@@ -1,12 +1,18 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { MdSearch } from 'react-icons/md';
 import { FiMenu } from 'react-icons/fi';
+import { useContext } from 'react';
+import { AuthContext } from '../Context/AuthContext';
 import CartList from './CartList';
 
 const Navbar = ({ darkTheme, toggleTheme }) => {
+    const [isLoggedin, setIsLoggedin] = useState(false);
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+    const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
+
+    const { currentUser } = useContext(AuthContext);
 
     const toggleDropdown = () => {
         setIsDropdownOpen(!isDropdownOpen);
@@ -16,6 +22,22 @@ const Navbar = ({ darkTheme, toggleTheme }) => {
     const toggleMobileMenu = () => {
         setIsMobileMenuOpen(!isMobileMenuOpen);
         setIsDropdownOpen(false); // Close dropdown when opening mobile menu
+    };
+
+    const toggleProfileDropdown = () => {
+        setIsProfileDropdownOpen(!isProfileDropdownOpen);
+    }
+
+    useEffect(() => {
+        const user = JSON.parse(localStorage.getItem('user'));
+        if (user) {
+            setIsLoggedin(true);
+        }
+    }, []);
+
+    const handleLogout = () => {
+        localStorage.removeItem('user');
+        window.location.href = '/';
     };
 
     return (
@@ -43,16 +65,58 @@ const Navbar = ({ darkTheme, toggleTheme }) => {
                 </div>
                 <div className='flex items-center justify-center'>
                     <Link to='/cart' className='flex items-center justify-center'>
-                    <img src='/Assets/cart.png' alt='cart' className='w-8 h-8' />
+                        <img src='/Assets/cart.png' alt='cart' className='w-8 h-8' />
                     </Link>
                 </div>
                 <div className='flex items-center justify-center'>
-                    <Link
-                        to='/login'
-                        className='bg-[#3C5B6F] text-white font-bold py-[0.5rem] px-[0.65rem] rounded-md shadow-md hover:bg-[#153448] focus:outline-none text-sm'
-                    >
-                        LOGIN
-                    </Link>
+                    {isLoggedin ? (
+                        <div className='flex cursor-pointer' onClick={toggleProfileDropdown}>
+                            <img src='/Assets/profile.png' alt='user' className='w-10 h-10' />
+                        </div>
+                    ) : (
+                        <Link
+                            to='/login'
+                            className='bg-[#3C5B6F] text-white font-bold py-[0.5rem] px-[0.65rem] rounded-md shadow-md hover:bg-[#153448] focus:outline-none text-sm'
+                        >
+                            LOGIN
+                        </Link>
+                    )}
+                    {isProfileDropdownOpen && (
+                        <div className='absolute top-[5rem] right-16 w-[14.25rem] rounded-lg shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-50'>
+                            <div className='py-1' role='menu' aria-orientation='vertical' aria-labelledby='options-menu'>
+                                <a
+                                    href='#'
+                                    className='block px-4 py-2 text-[1.5rem] font-comfortaa font-normal text-gray-700 hover:bg-gray-100 flex items-center justify-start gap-2'
+                                    style={{ lineHeight: '1.12rem' }}
+                                    role='menuitem'
+                                >
+                                    <img src='/Assets/user.png' alt='user' className='w-6 h-6 mr-2' />
+                                    My account
+                                </a>
+                                <a
+                                    href='#'
+                                    className='block px-4 py-2 text-[1.5rem] font-comfortaa font-normal text-gray-700 hover:bg-gray-100 flex items-center justify-start gap-2'
+                                    style={{ lineHeight: '1.12rem' }}
+                                    role='menuitem'
+                                >
+                                    <img src='/Assets/order.png' alt='order' className='w-6 h-6 mr-2' />
+                                    Orders
+                                </a>
+                                {isLoggedin && (
+                                    <a
+                                        href='#'
+                                        onClick={handleLogout}
+                                        className='block px-4 py-2 text-[1.5rem] font-comfortaa font-normal text-gray-700 hover:bg-gray-100 flex items-center justify-start gap-2'
+                                        style={{ lineHeight: '1.12rem' }}
+                                        role='menuitem'
+                                    >
+                                        <img src='/Assets/logout.png' alt='logout' className='w-6 h-6 mr-2' />
+                                        Logout
+                                    </a>
+                                )}
+                            </div>
+                        </div>
+                    )}
                 </div>
                 <div className='flex items-center justify-center relative'>
                     {darkTheme ? (
@@ -89,6 +153,18 @@ const Navbar = ({ darkTheme, toggleTheme }) => {
                                 >
                                     24x7 Customer Care
                                 </a>
+                                {
+                                    isLoggedin ? (
+                                        <a
+                                            href='#'
+                                            className='block px-4 py-2 text-[1.5rem] font-comfortaa font-normal text-gray-700 hover:bg-gray-100'
+                                            style={{ lineHeight: '1.12rem' }}
+                                            role='menuitem'
+                                        >
+                                            Become a seller
+                                        </a>
+                                    ) : null
+                                }
                             </div>
                         </div>
                     )}
@@ -117,12 +193,21 @@ const Navbar = ({ darkTheme, toggleTheme }) => {
                             <img src='/Assets/cart.png' alt='cart' className='w-8 h-8' />
                         </div>
                         <div className='flex'>
-                            <Link
-                                to='/login'
-                                className='bg-[#3C5B6F] text-white font-bold py-[0.5rem] px-[0.65rem] rounded-md shadow-md hover:bg-[#153448] focus:outline-none text-sm'
-                            >
-                                LOGIN
-                            </Link>
+                            {isLoggedin ? (
+                                <button
+                                    onClick={handleLogout}
+                                    className='bg-[#3C5B6F] text-white font-bold py-[0.5rem] px-[0.65rem] rounded-md shadow-md hover:bg-[#153448] focus:outline-none text-sm'
+                                >
+                                    LOGOUT
+                                </button>
+                            ) : (
+                                <Link
+                                    to='/login'
+                                    className='bg-[#3C5B6F] text-white font-bold py-[0.5rem] px-[0.65rem] rounded-md shadow-md hover:bg-[#153448] focus:outline-none text-sm'
+                                >
+                                    LOGIN
+                                </Link>
+                            )}
                         </div>
                         <div className='flex relative'>
                             <button

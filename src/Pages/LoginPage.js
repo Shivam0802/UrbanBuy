@@ -1,11 +1,42 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link,useNavigate } from 'react-router-dom';
 import { MdEmail } from "react-icons/md";
 import { FcLock } from "react-icons/fc";
+import { signInWithEmailAndPassword } from 'firebase/auth';
+import { auth } from '../firebase';
+import { useContext } from 'react';
+import { AuthContext } from '../Context/AuthContext';
+
 
 const LoginPage = () => {
     const [showPassword, setShowPassword] = useState(true);
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
+
+    const navigate = useNavigate();
+    const { dispatch } = useContext(AuthContext);
+
+    const handleLogin = async (e) => {
+        e.preventDefault();
+        setLoading(true);
+        setError('');
+
+        try {
+            const userCredential = await signInWithEmailAndPassword(auth, email, password);
+            const user = userCredential.user;
+            localStorage.setItem('user', JSON.stringify(user));
+
+            if( localStorage.getItem('user') ){
+               navigate('/');
+            }
+        } catch (error) {
+            setError('Invalid email or password');
+        } finally {
+            setLoading(false);
+        }
+    };
 
     const handlePassword = () => {
         setShowPassword(!showPassword);
@@ -21,7 +52,7 @@ const LoginPage = () => {
                             Sign in to your account to continue
                         </p>
                         <hr className="mb-4" />
-                        <form>
+                        <form onSubmit={handleLogin}>
                             <div className="mb-4">
                                 <label htmlFor="email" className="block text-m font-medium text-gray-800 font-comfortaa text-2xl">
                                     Email
@@ -31,6 +62,7 @@ const LoginPage = () => {
                                         type="email"
                                         id="email"
                                         name="email"
+                                        onChange={(e) => setEmail(e.target.value)}
                                         placeholder="Enter your email"
                                         style={{ width: '90%', border: 'none', outline: 'none', color: '#151515' }}
                                         required
@@ -47,6 +79,7 @@ const LoginPage = () => {
                                         id="password"
                                         name="password"
                                         type={showPassword ? 'password' : 'text'}
+                                        onChange={(e) => setPassword(e.target.value)}
                                         placeholder="Enter your password"
                                         style={{ width: '90%', border: 'none', outline: 'none', color: '#151515' }}
                                         required
@@ -73,7 +106,7 @@ const LoginPage = () => {
                             >
                                 {loading ? 'Loading...' : 'Login'}
                             </button>
-                            {/* {error && <p className="text-red-500 text-center">Invalid Email or Password</p>} */}
+                             {error && <p className="text-red-500 text-center">Invalid Email or Password</p>}
                         </form>
                         <p className="mt-4 font-comfortaa font-normal text-2xl text-gray-800">
                             Don't have an account?{' '}

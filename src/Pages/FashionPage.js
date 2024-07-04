@@ -1,14 +1,28 @@
-import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import React, { useState, useEffect } from "react";
 import Navbar from "../Components/Navbar";
 import Footer from "../Components/Footer";
 import ProductCard from "../Components/ProductCard";
-import { Fashion } from "../StaticData/staticData";
-import { MdArrowRight } from "react-icons/md";
+import {db} from "../firebase";
+import { collection, getDocs, query, where } from "firebase/firestore";
 
 const FashionPage = ({ darkTheme, toggleTheme }) => {
     const [minPrice, setMinPrice] = useState(300);
     const [maxPrice, setMaxPrice] = useState(15000);
+    const [products, setProducts] = useState([]);
+
+    useEffect(() => {
+        const fetchProducts = async () => {
+            const q = query(collection(db, "products"), where("category", "==", "Fashion"));
+            const querySnapshot = await getDocs(q);
+            const productsList = querySnapshot.docs.map(doc => ({
+                id: doc.id,
+                ...doc.data()
+            }));
+            setProducts(productsList);
+        };
+
+        fetchProducts();
+    }, []);
 
     const handleMinChange = (e) => {
         setMinPrice(Number(e.target.value));
@@ -22,7 +36,7 @@ const FashionPage = ({ darkTheme, toggleTheme }) => {
         <>
             <Navbar darkTheme={darkTheme} toggleTheme={toggleTheme} />
             <div className={`flex flex-col lg:flex-row bg-gray-50 ${darkTheme ? 'text-white' : 'text-black'}`}>
-                <div className={`w-full lg:w-[38rem] p-3 ${darkTheme ? 'bg-[#1A2130]' : 'bg-gray-50'} text-gray-700`}>
+                <div className={`w-full lg:w-[55rem] p-3 ${darkTheme ? 'bg-[#1A2130]' : 'bg-gray-50'} text-gray-700`}>
                     <h1 className="text-2xl lg:text-[1.9rem] p-2 font-medium font-comfortaa text-[#FFA27F]" style={{ lineHeight: '1.2rem' }}>Filters</h1>
                     <hr className={`border-1 ${darkTheme ? 'border-green-300' : 'border-gray-300'} rounded-lg`} />
                     <div className="flex flex-col p-2">
@@ -75,53 +89,13 @@ const FashionPage = ({ darkTheme, toggleTheme }) => {
                         <button className="bg-green-200 text-black text-[1.8rem] font-comfortaa font-normal p-1 rounded mt-2 pt-[0.8rem] hover:bg-green-400" style={{ lineHeight: '1.2rem' }}>Apply</button>
                     </div>
                     <hr className={`border-1 ${darkTheme ? 'border-green-300' : 'border-gray-300'} rounded-lg mt-2`} />
-                    <div className="flex flex-col p-2">
-                        <h2 className="text-xl lg:text-[1.5rem] font-semibold mb-2 font-comfortaa" style={{ color: darkTheme ? '#FFFFFF' : '#333333' }}>CATEGORY</h2>
-                        <div className="flex flex-col gap-2">
-                            {
-                                Fashion.map((item) => {
-                                    return (
-                                        <label key={item.id} className="flex flex-row items-center gap-2">
-                                            <Link to={`/fashion/${item.desc}`} className="h-4 w-full flex flex-row gap-2 items-center hover:text-red-300">
-                                                <MdArrowRight className="h-6 w-6" />
-                                                <span className={`mt-1 font-comfortaa font-normal text-[1.5rem] ${darkTheme ? 'text-white' : 'text-black'} hover:text-red-300`}>{item.desc}</span>
-                                            </Link>
-                                        </label>
-                                    );
-                                })
-                            }
-                        </div>
-                    </div>
-                    <hr className={`border-1 ${darkTheme ? 'border-green-300' : 'border-gray-300'} rounded-lg mt-2`} />
-                    <div className="flex flex-col p-2">
-                        <h2 className="text-xl lg:text-[1.5rem] font-semibold mb-2 font-comfortaa" style={{ color: darkTheme ? '#FFFFFF' : '#333333' }}>BRAND</h2>
-                        <div className="flex flex-col gap-2">
-                            <label className="flex flex-row items-center gap-2">
-                                <input type="checkbox" className="h-4 w-4" />
-                                <span className={`${darkTheme ? 'text-white' : 'text-black'}`}>Trousers</span>
-                            </label>
-                            <label className="flex flex-row items-center gap-2">
-                                <input type="checkbox" className="h-4 w-4" />
-                                <span className={`${darkTheme ? 'text-white' : 'text-black'}`}>Shirts</span>
-                            </label>
-                            <label className="flex flex-row items-center gap-2">
-                                <input type="checkbox" className="h-4 w-4" />
-                                <span className={`${darkTheme ? 'text-white' : 'text-black'}`}>Footwear</span>
-                            </label>
-                            <label className="flex flex-row items-center gap-2">
-                                <input type="checkbox" className="h-4 w-4" />
-                                <span className={`${darkTheme ? 'text-white' : 'text-black'}`}>Accessories</span>
-                            </label>
-                        </div>
-                    </div>
+                    
                 </div>
                 <div className={`flex flex-col p-4 lg:p-6 ${darkTheme ? 'bg-gray-900' : 'bg-white'}`}>
                     <div className="flex flex-wrap gap-4">
-                        {Array(10)
-                            .fill(0)
-                            .map((_, i) => (
-                                <ProductCard key={i} darkTheme={darkTheme} />
-                            ))}
+                        {products.map((product) => (
+                            <ProductCard key={product.id} product={product}/>
+                        ))}
                     </div>
                 </div>
             </div>
@@ -131,4 +105,3 @@ const FashionPage = ({ darkTheme, toggleTheme }) => {
 };
 
 export default FashionPage;
-

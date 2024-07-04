@@ -4,12 +4,28 @@ import { IoPersonSharp } from "react-icons/io5";
 import { MdEmail } from "react-icons/md";
 import { BsFillTelephoneFill } from "react-icons/bs";
 import { FcLock, FcUnlock } from "react-icons/fc";
+import { createUserWithEmailAndPassword, sendEmailVerification } from "firebase/auth";
+import { setDoc, doc, serverTimestamp } from "firebase/firestore";
+import { db, auth } from "../firebase";
+import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
+import 'react-toastify/dist/ReactToastify.css';
 //import { FaLocationDot, FaTransgender } from "react-icons/fa6";
 
 const Register = () => {
     const [showPassword, setShowPassword] = useState(true);
+    const [errors, setErrors] = useState({});
     const [showConfirmPassword, setShowConfirmPassword] = useState(true);
+    const [data, setData] = useState({
+        name: '',
+        email: '',
+        contact: '',
+        password: '',
+        confirmPassword: ''
+    });
     const [loading, setLoading] = useState(false);
+
+    const navigate = useNavigate();
 
     const handleConfirmPassword = () => {
         setShowConfirmPassword(!showConfirmPassword);
@@ -17,6 +33,73 @@ const Register = () => {
 
     const handlePassword = () => {
         setShowPassword(!showPassword);
+    };
+
+    const handleChange = (e) => {
+        const id = e.target.id;
+        const value = e.target.value;
+
+        setData({ ...data, [id]: value });
+    };
+
+    const validate = () => {
+        let tempErrors = {};
+        tempErrors.name = data.name ? "" : "Name is required.";
+        tempErrors.email = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email) ? "" : "Email is not valid.";
+        tempErrors.contact = /^\+\d{0,2} \d{10}$/.test(data.contact) ? "" : "Contact number must be 10 digits.";
+        tempErrors.password = data.password.length >= 6 ? "" : "Password must be at least 6 characters.";
+        tempErrors.confirmPassword = data.confirmPassword === data.password ? "" : "Passwords do not match.";
+
+        setErrors(tempErrors);
+        return Object.values(tempErrors).every(x => x === "");
+    };
+
+    const handleAdd = async (e) => {
+        e.preventDefault();
+        setLoading(true);
+
+        if (!validate()) return;
+
+        try {
+            console.log('Attempting to create user...');
+            const res = await createUserWithEmailAndPassword(auth, data.email, data.password);
+            console.log('User created: ', res.user);
+
+            await setDoc(doc(db, 'users', res.user.uid), {
+                name: data.name,
+                email: data.email,
+                contact: data.contact,
+                role: 'user',
+                timestamp: serverTimestamp()
+            });
+
+            // Send email verification
+            await sendEmailVerification(res.user);
+            console.log('Verification email sent.');
+
+            toast.success('User Registered Successfully! Verification email sent.', {
+                position: "top-right",
+                autoClose: 5000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                progress: undefined,
+            });
+
+            navigate('/login');
+        } catch (error) {
+            console.error('Error registering user: ', error);
+            toast.error('Error registering user: ' + error.message, {
+                position: "top-right",
+                autoClose: 5000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                progress: undefined,
+            });
+        }
     };
 
     return (
@@ -28,7 +111,7 @@ const Register = () => {
                         Sign up to create an account
                     </p>
                     <hr className="mb-2" />
-                    <form>
+                    <form onSubmit={handleAdd}>
                         <div className="mb-4">
                             <label htmlFor="name" className="block font-medium text-gray-800 font-comfortaa text-2xl">
                                 Name
@@ -38,6 +121,8 @@ const Register = () => {
                                     type="text"
                                     id="name"
                                     name="name"
+                                    value={data.name}
+                                    onChange={handleChange}
                                     placeholder="Name"
                                     required
                                     style={{ width: '90%', border: 'none', outline: 'none', color: '#151515' }}
@@ -54,6 +139,8 @@ const Register = () => {
                                     type="email"
                                     id="email"
                                     name="email"
+                                    value={data.email}
+                                    onChange={handleChange}
                                     placeholder="Email"
                                     required
                                     style={{ width: '90%', border: 'none', outline: 'none', color: '#151515' }}
@@ -70,6 +157,8 @@ const Register = () => {
                                     type="tel"
                                     id="contact"
                                     name="contact"
+                                    value={data.contact}
+                                    onChange={handleChange}
                                     placeholder="+91 123-456-7890"
                                     required
                                     style={{ width: '90%', border: 'none', outline: 'none', color: '#151515' }}
@@ -87,6 +176,8 @@ const Register = () => {
                                         type={showPassword ? 'password' : 'text'}
                                         id="password"
                                         name="password"
+                                        value={data.password}
+                                        onChange={handleChange}
                                         placeholder="Password"
                                         required
                                         style={{ width: '90%', border: 'none', outline: 'none', color: '#151515' }}
@@ -106,6 +197,8 @@ const Register = () => {
                                         type={showConfirmPassword ? 'password' : 'text'}
                                         id="confirmPassword"
                                         name="confirmPassword"
+                                        value={data.confirmPassword}
+                                        onChange={handleChange}
                                         placeholder="Confirm Password"
                                         required
                                         style={{ width: '90%', border: 'none', outline: 'none', color: '#151515' }}
