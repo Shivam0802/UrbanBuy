@@ -2,13 +2,16 @@ import React, { useState, useEffect } from "react";
 import Navbar from "../Components/Navbar";
 import Footer from "../Components/Footer";
 import ProductCard from "../Components/ProductCard";
+import ProductList from "../Components/ProductList";
 import { db } from "../firebase";
 import { collection, getDocs, query, where } from "firebase/firestore";
+import { CiGrid42,CiViewList } from "react-icons/ci";
 
 const FashionPage = ({ darkTheme, toggleTheme }) => {
     const [minPrice, setMinPrice] = useState(300);
     const [maxPrice, setMaxPrice] = useState(15000);
     const [products, setProducts] = useState([]);
+    const [veiw, setVeiw] = useState('grid');
 
     const handleMinChange = (e) => {
         setMinPrice(Number(e.target.value));
@@ -36,7 +39,7 @@ const FashionPage = ({ darkTheme, toggleTheme }) => {
         <>
             <Navbar darkTheme={darkTheme} toggleTheme={toggleTheme} />
             <div className={`flex flex-col lg:flex-row bg-gray-50 ${darkTheme ? 'text-white' : 'text-black'}`}>
-                <div className={`w-full lg:w-[30rem] p-3 ${darkTheme ? 'bg-[#1A2130]' : 'bg-gray-50'} text-gray-700`}>
+                <div className={`w-full lg:w-[20%] p-3 ${darkTheme ? 'bg-[#1A2130]' : 'bg-gray-50'} text-gray-700`}>
                     <h1 className="text-2xl lg:text-[1.9rem] p-2 font-medium font-comfortaa text-[#FFA27F]" style={{ lineHeight: '1.2rem' }}>Filters</h1>
                     <hr className={`border-1 ${darkTheme ? 'border-green-300' : 'border-gray-300'} rounded-lg`} />
                     <div className="flex flex-col p-2">
@@ -95,12 +98,33 @@ const FashionPage = ({ darkTheme, toggleTheme }) => {
                     </div>
                     <hr className={`border-1 ${darkTheme ? 'border-green-300' : 'border-gray-300'} rounded-lg mt-2`} />
                 </div>
-                <div className={`flex flex-col p-4 lg:p-6 ${darkTheme ? 'bg-gray-900' : 'bg-white'}`}>
-                    <div className="flex flex-wrap gap-4">
-                        {products.map((product) => (
-                            <ProductCard key={product.id} product={product} />
-                        ))}
+                <div className={`w-[92%] flex flex-col p-4 lg:p-6 ${darkTheme ? 'bg-gray-900' : 'bg-white'}`}>
+                    <div className="flex justify-between items-center p-2">
+                        <h1 className="text-2xl lg:text-[4rem] p-2 font-medium font-comfortaa text-[#FFA27F]" style={{ lineHeight: '1.2rem' }}>Assessories</h1>
+                        <div className="flex gap-4">
+                            <button onClick={() => setVeiw('grid')} className={`${veiw === 'grid' ? 'text-[#C73659]' : 'text-black'}`}>
+                                <CiGrid42 size={35} />
+                            </button>
+                            <button onClick={() => setVeiw('list')} className={`${veiw === 'list' ? 'text-[#C73659]' : 'text-black'}`}>
+                                <CiViewList size={35} />
+                            </button>
+                        </div>
                     </div>
+                    {
+                        veiw === 'grid' ? (
+                            <div className="flex flex-wrap gap-4 pt-4">
+                                {products.map((product) => (
+                                    <ProductCard key={product.id} product={product} />
+                                ))}
+                            </div>
+                        ) : (
+                            <div className="flex flex-wrap gap-4 pt-4">
+                                {products.map((product) => (
+                                    <ProductList key={product.id} product={product} />
+                                ))}
+                            </div>
+                        )
+                    }
                 </div>
             </div>
             <Footer darktheme={darkTheme} />

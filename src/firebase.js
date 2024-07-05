@@ -3,8 +3,10 @@ import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
 
+// Your web app's Firebase configuration
+
 const firebaseConfig = {
-  apiKey: process.env.FIREBASE_API_KEY,
+  apiKey: process.env.FIREBASE_API_KEY || "mock-api-key",
   authDomain: "urbanbuy-93a58.firebaseapp.com",
   projectId: "urbanbuy-93a58",
   storageBucket: "urbanbuy-93a58.appspot.com",

@@ -2,17 +2,13 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { MdSearch } from 'react-icons/md';
 import { FiMenu } from 'react-icons/fi';
-import { useContext } from 'react';
-import { AuthContext } from '../Context/AuthContext';
-import CartList from './CartList';
 
 const Navbar = ({ darkTheme, toggleTheme }) => {
     const [isLoggedin, setIsLoggedin] = useState(false);
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
-
-    const { currentUser } = useContext(AuthContext);
+    const [searchQuery, setSearchQuery] = useState('');
 
     const toggleDropdown = () => {
         setIsDropdownOpen(!isDropdownOpen);
@@ -40,6 +36,11 @@ const Navbar = ({ darkTheme, toggleTheme }) => {
         window.location.href = '/';
     };
 
+    const handleSearch = (e) => {
+        e.preventDefault();
+        setSearchQuery(e.target.value);
+    };
+
     return (
         <div className={`flex items-center justify-between h-[6.5rem] ${darkTheme ? 'bg-[#222831]' : 'bg-[#E8E8E8]'} px-4 md:pr-8 relative`}>
             <Link to='/'>
@@ -50,6 +51,8 @@ const Navbar = ({ darkTheme, toggleTheme }) => {
             <div className="w-[50%] flex flex-row bg-white border-solid border-2 border-[#A8CD9F] rounded-lg">
                 <input
                     type="text"
+                    value={searchQuery}
+                    onChange={handleSearch}
                     placeholder="Search here for any kind product"
                     className="w-full px-4 py-2 rounded-lg focus:outline-none"
                 />

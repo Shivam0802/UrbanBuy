@@ -10,7 +10,7 @@ import AppliancePage from "./Pages/AppliancePage";
 import SportsPage from "./Pages/SportsPage";
 import FurniturePage from "./Pages/FurniturePage";
 import CartList from "./Components/CartList";
-import Payment from "./Components/Payment";
+import PaymentPage from "./Pages/PaymentPage";
 import { Navigate } from "react-router";
 import { useContext } from "react";
 import { AuthContext } from "./Context/AuthContext";
@@ -46,11 +46,7 @@ function App() {
         <Route path='/sports' element={<SportsPage darkTheme={darkTheme} toggleTheme={toggleTheme} />} />
         <Route path='/furniture' element={<FurniturePage darkTheme={darkTheme} toggleTheme={toggleTheme} />} />
         <Route path='/cart' element={<CartList darkTheme={darkTheme} toggleTheme={toggleTheme} />} />
-        <Route path='/payment' element={
-          <RequireAuth>
-            <Payment darkTheme={darkTheme} toggleTheme={toggleTheme} />
-          </RequireAuth>
-        } />
+        <Route path='/payment' element={<PaymentPage />} />
         <Route path='*' element={<h1>404 Not Found</h1>} />
       </Routes>
     </div>

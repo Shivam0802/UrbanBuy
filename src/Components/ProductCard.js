@@ -1,6 +1,8 @@
 import React from "react";
 import Modal from "./Modal";
-import Payment from "./Payment";
+import AddDeliveryAddress from "./AddDeliveryAddress";
+import { db, auth } from "../firebase";
+import { addDoc, collection } from "firebase/firestore";
 
 const ProductCard = ({ product }) => {
     const [isOpen, setIsOpen] = React.useState(false);
@@ -11,6 +13,27 @@ const ProductCard = ({ product }) => {
 
     const onClose = () => {
         setIsOpen(false);
+    };
+
+    const addToCart = async (product) => {
+        try {
+            const user = auth.currentUser;
+            if (user) {
+                const docRef = await addDoc(collection(db, "cart"), {
+                    ...product,
+                    userId: user.uid
+                });
+                console.log("Document written with ID: ", docRef.id);
+            } else {
+                console.log("No user is logged in");
+            }
+        } catch (e) {
+            console.error("Error adding document: ", e);
+        }
+    };
+
+    const handleAddToCart = async () => {
+        await addToCart(product);
     };
 
     const image = product?.images?.length > 0 ? product.images[0] : 'default-image-url';
@@ -25,7 +48,7 @@ const ProductCard = ({ product }) => {
                 </div>
                 <div className="flex flex-col gap-4">
                     <div className="flex flex-row justify-between">
-                        <div className="flex flex-col">
+                        <div className="flex flex-col w-[70%]">
                             <span className="text-gray-700 font-normal font-comfortaa text-[1.8rem] mt-2" style={{ lineHeight: '1.12rem' }}>{name}</span>
                         </div>
                         <span className="font-medium font-comfortaa text-[1.4rem] text-red-600">₹ {price}</span>
@@ -38,12 +61,12 @@ const ProductCard = ({ product }) => {
                     </div>
                     <div className="flex flex-row gap-2">
                         <button onClick={openModal} className="w-full hover:bg-sky-700 text-gray-50 bg-sky-800 py-2 rounded-md">Buy Now</button>
-                        <button className="w-full hover:bg-sky-700 text-gray-50 bg-sky-800 py-2 rounded-md">Add to Cart</button>
+                        <button onClick={handleAddToCart} className="w-full hover:bg-sky-700 text-gray-50 bg-sky-800 py-2 rounded-md">Add to Cart</button>
                     </div>
                 </div>
             </div>
             <Modal isOpen={isOpen} onClose={onClose}>
-                <Payment />
+                <AddDeliveryAddress total={price} />
             </Modal>
         </>
     );
